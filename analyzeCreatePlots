@@ -1,0 +1,105 @@
+function skincareCreatePlots(X18,Xn18,y,wts,n18vars,vars18)
+%Let's plot what we care about.
+close all;
+%Starting with the data for all of the peaks, for better or worse
+
+%Normalizing to sample weight
+
+X18norm = X18 ./ wts;
+
+%Autoscaling
+
+X18normAs = (X18norm - mean(X18norm)) ./ std(X18norm);
+
+%Principal Component Analysis
+[U18,S18,V18] = svd(X18normAs);
+
+prcntVar = (diag(S18)./sum(diag(S18)))*100;
+
+scrs18 = U18(:,1:2)*S18(1:2,1:2);
+
+%First, scores plot
+clrs = [0.9290 0.6940 0.1250;
+    0.6350 0.0780 0.1840;
+    0 0.4470 0.7410];
+    
+hold on;
+for ii = 1:3
+    scatter(scrs18(y == ii,1),scrs18(y == ii,2),50,clrs(ii,:),'filled');
+end
+
+legend({'Jojoba','Rosehip','Seabuckthorn'},'FontSize',12);
+ax1 = gca;
+ax1.FontSize = 12;
+
+xlabel(sprintf('PC1: %.2f %%',prcntVar(1)),'FontSize',12);
+ylabel(sprintf('PC2: %.2f %%',prcntVar(2)),'FontSize',12);
+
+title('PCA scores of skincare oils, including C18 FAs')
+
+hold off;
+
+%Now it's time for the loadings chart
+figure(2);
+x1 = categorical(vars18);
+x1 = reordercats(x1,vars18);
+bar(x1,V18(1:2,:));
+
+ax2 = gca;
+ax2.FontSize = 12;
+
+xlabel('Fatty acids','FontSize',12)
+ylabel('Normalized Loadings','FontSize',12)
+
+title('Principal component characteristics, including C18 FAs');
+legend({'Loadings, PC1','Loadings, PC2'},'FontSize',12);
+
+figure(3);
+%PCA without C18
+Xn18norm = Xn18 ./ wts;
+
+%Autoscaling
+
+Xn18normAs = (Xn18norm - mean(Xn18norm)) ./ std(Xn18norm);
+
+%Principal Component Analysis
+[Un18,Sn18,Vn18] = svd(Xn18normAs);
+
+prcntVarn = (diag(Sn18)./sum(diag(Sn18)))*100;
+
+scrsn18 = Un18(:,1:2)*Sn18(1:2,1:2);
+
+%First, scores plot
+clrs = [0.9290 0.6940 0.1250;
+    0.6350 0.0780 0.1840;
+    0 0.4470 0.7410];
+    
+hold on;
+for ii = 1:3
+    scatter(scrsn18(y == ii,1),scrsn18(y == ii,2),50,clrs(ii,:),'filled');
+end
+
+legend({'Jojoba','Rosehip','Seabuckthorn'},'FontSize',12);
+ax1 = gca;
+ax1.FontSize = 12;
+
+xlabel(sprintf('PC1: %.2f %%',prcntVarn(1)),'FontSize',12);
+ylabel(sprintf('PC2: %.2f %%',prcntVarn(2)),'FontSize',12);
+
+title('PCA scores of skincare oils, excluding C18')
+
+figure(4);
+x1 = categorical(n18vars);
+x1 = reordercats(x1,n18vars);
+bar(x1,Vn18(1:2,:));
+
+ax2 = gca;
+ax2.FontSize = 12;
+
+xlabel('Fatty acids','FontSize',12)
+ylabel('Normalized Loadings','FontSize',12)
+
+title('Principal component characteristics, excluding C18 FAs');
+legend({'Loadings, PC1','Loadings, PC2'},'FontSize',12);
+
+end
